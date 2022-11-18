@@ -120,7 +120,7 @@ export const getStaticPaths: GetStaticPaths = async (ctx) => {
         params: {name: name}
       })),
   
-      fallback: false
+      fallback: 'blocking'
     }
   }
 //   // Después de que se ejecutan los paths, pasan al getStaticProps
@@ -128,10 +128,20 @@ export const getStaticPaths: GetStaticPaths = async (ctx) => {
   export const getStaticProps: GetStaticProps = async ({params}) => {
 
     const {name} = params as {name:string};
+    const pokemon =  await getPokemonInfo(name);
+    if(!pokemon){
+      return {
+        redirect: {
+          destination: '/',
+          permanent: false
+        }
+      }
+    }
     return {
       props: {
-        pokemon: await getPokemonInfo(name),
-      }
+        pokemon
+      },
+      revalidate: 86400,
     }
   }
   
