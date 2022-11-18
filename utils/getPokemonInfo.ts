@@ -8,7 +8,7 @@ export const getPokemonInfo = async(nameOrId: string) => {
 
     // const { data } = await  // your fetch function here 
   
-    const {data} = await pokeApi.get<Pokemon>(`/pokemon/${name}`);
+    const {data} = await pokeApi.get<Pokemon>(`/pokemon/${nameOrId}`);
     return {
       id: data.id,
       name:data.name,
