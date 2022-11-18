@@ -1,28 +1,29 @@
 import { Button, Card, Container, Grid, Text,Image } from "@nextui-org/react";
 import { GetStaticProps, NextPage ,GetStaticPaths} from "next";
 import { useEffect, useState } from "react";
-import { pokeApi } from "../../api";
 import { Layout } from "../../components/layouts";
 import { Pokemon, PokemonListResponse } from "../../interfaces";
-import { localFavorites } from "../../utils";
+
 import confetti from 'canvas-confetti';
-import { getPokemonInfo } from '../../utils/getPokemonInfo';
+import { pokeApi } from "../../api";
+import { getPokemonInfo, localFavorites } from "../../utils";
 
 interface Props{
   pokemon: Pokemon;
 }
 
 
- const PokemonPage:NextPage<Props> = ({pokemon}) => {
+ const NamePokemon:NextPage<Props> = ({pokemon}) => {
 
-  // const router = useRouter();
-  // console.log(router.query);
-
-  const [isInFavorites, setIsInFavorites] = useState(typeof window === "undefined" && localFavorites.existInFavorites(pokemon.id));
+    // hago un estado
+    // y lo verifico de una vez
+    // const [isInFavorites, setIsInFavorites] = useState(localFavorites.existInFavorites(pokemon.id));
+    // este si sirve
+    const [isInFavorites, setIsInFavorites] = useState(typeof window === "undefined" && localFavorites.existInFavorites(pokemon.id));
 
 const onToggleFavorite = () => {
 
- // console.log('Hola mundo');
+   // console.log('Hola mundo');
         // console.log('ID: ', pokemon.id);
         localFavorites.toggleFavorite(pokemon.id);
         // ocupo redibujar mi estado
@@ -53,6 +54,8 @@ const onToggleFavorite = () => {
         }
  
     }
+
+
 
 
 
@@ -109,36 +112,28 @@ const onToggleFavorite = () => {
 // You should use getStaticPaths if you’re statically pre-rendering pages that use dynamic routes
 
 export const getStaticPaths: GetStaticPaths = async (ctx) => {
-  const pokemons151 = [...Array(151)].map((value,index) => `${index + 1 }`);
-  return {
-    paths: pokemons151.map(id => ({
-      params: {id: id}
-    })),
-    // paths: [
-    //   {
-    //     params: {
-    //       id:'1'
-    //     },
-       
-    //   }
-    // ],
-    fallback: false
-  }
-}
-// Después de que se ejecutan los paths, pasan al getStaticProps
-
-export const getStaticProps: GetStaticProps = async ({params}) => {
-
-  const {id} = params as {id:string};
-  // const { data } = await  // your fetch function here 
-  return {
-    props: {
-      pokemon: await getPokemonInfo(id),
+    
+    const {data} = await pokeApi.get<PokemonListResponse>('/pokemon?limit=151');
+    const pokemonNames: string[] = data.results.map(pokemon => pokemon.name)
+    return {
+      paths: pokemonNames.map(name => ({
+        params: {name: name}
+      })),
+  
+      fallback: false
     }
   }
-}
+//   // Después de que se ejecutan los paths, pasan al getStaticProps
+  
+  export const getStaticProps: GetStaticProps = async ({params}) => {
 
-
-
-
-export default PokemonPage;
+    const {name} = params as {name:string};
+    return {
+      props: {
+        pokemon: await getPokemonInfo(name),
+      }
+    }
+  }
+  
+  
+  export default NamePokemon
